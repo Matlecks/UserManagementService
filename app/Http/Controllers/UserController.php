@@ -2,39 +2,48 @@
 
 namespace App\Http\Controllers;
 
+/* Слушатель */
+
 use App\Events\UserCreated;
+
+use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
+/* Реквесты */
+use App\Http\Requests\UpdateUserRequest;
+
+/* Для тайпхинтов */
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
+use Illuminate\View\View;
+
 class UserController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $users = User::all();
 
         return view('users.index', compact('users'));
     }
 
-    public function edit($id)
+    public function edit($id): View
     {
         $user = User::find($id);
 
         return view('users.edit', compact('user'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateUserRequest $request, int  $id): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         $user = User::find($id);
         $user->update($validated);
 
         $message = "Пользователь отредактирован";
-        return redirect()->route('user.index')->with('message', value: $message);
+        return redirect()->route('user.index')->with('message', $message);
     }
 
     public function create()
@@ -42,21 +51,16 @@ class UserController extends Controller
         return view('users.create');
     }
 
-    public function store(Request $request)/* : JsonResponse|mixed */
+    public function store(StoreUserRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         $user = User::create($validated);
 
         //генерим ивент
         event(new UserCreated($user));
 
-        //отправляем в очередь
-        //dispatch(new UserCreated($user));
-
+        // отправляем запрос на сервис task
         Http::post('http://taskmanagementservice.ru/api/user-created', [
             'user' => [
                 'name' => $user->name,
@@ -66,10 +70,10 @@ class UserController extends Controller
 
 
         $message = "Задача создана";
-        return redirect()->route('user.index')->with('message', value: $message);
+        return redirect()->route('user.index')->with('message', $message);
     }
 
-    public function destroy($id)
+    public function destroy($id): RedirectResponse
     {
         $user = User::find($id);
 
@@ -79,7 +83,7 @@ class UserController extends Controller
         return redirect()->route('user.index')->with('message', value: $message);
     }
 
-    public function give_all_users()
+    public function give_all_users(): JsonResponse
     {
         $users = User::all();
 
@@ -88,6 +92,4 @@ class UserController extends Controller
             'data' => $users,
         ]);
     }
-
-
 }
