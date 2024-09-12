@@ -6,13 +6,13 @@ namespace App\Http\Controllers;
 
 use App\Events\UserCreated;
 
-use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 /* Реквесты */
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\StoreUserRequest;
 
 /* Для тайпхинтов */
 use Illuminate\Http\RedirectResponse;
