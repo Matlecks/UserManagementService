@@ -19,4 +19,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/users', [UserController::class, 'store'])->name('user.store');
+
+// Route::post('/users', [UserController::class, 'store'])->name('user.store');
+Route::get('/give_users', [UserController::class, 'give_all_users'])->name('user.give');
